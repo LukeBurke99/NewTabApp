@@ -1,0 +1,81 @@
+﻿@using NewTab.Web.Services
+@using NewTab.Web.Models
+@inject JsConsoleService _log
+@inject BookmarkService _bookmarkService
+@page "/"
+
+
+<div class="container">
+    
+    <div class="input-group mb-3">
+        <input type="text" class="form-control border-secondary border-end-0 rounded-0" placeholder="Google search...">
+        <button class="btn border border-secondary border-start-0 rounded-0" type="button">
+            <Search />
+        </button>
+    </div>
+    
+    @*<div class="row">
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+        <div class="col"><div class="bg-dark" style="height: 100px"></div></div>
+    </div>*@
+    @if (Bookmarks?.Children != null)
+    {
+        const int itemsInRow = 9;
+        var rows = (int)Math.Ceiling((double)Bookmarks.Children.Length / itemsInRow);
+        var counter = 0;
+        for (var row = 0; row < rows; row++)
+        {
+            <div class="row text-center">
+                @for (var column = 0; column < itemsInRow; column++)
+                {
+                    if (counter >= Bookmarks.Children.Length)
+                    {
+                        <div class="col"><div class="bg-danger" style="height: 100px"></div></div>
+                    }
+                    else
+                    {
+                        var bookmark = Bookmarks.Children[counter];
+                        <div class="col">
+                            <div class="bg-dark py-5 text-white">
+                                @bookmark.Name
+                            </div>
+                        </div>
+                    }
+                    counter++;
+                }
+            </div>
+        }
+    }
+
+
+</div>
+
+
+@code {
+
+    public Bookmark? Bookmarks { get; set; } = null;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await GetBookmarksAsync();
+    }
+
+    private async Task GetBookmarksAsync()
+    {
+        Bookmarks = await _bookmarkService.GetBookmarksAsync();
+        if (Bookmarks != null) {
+            Bookmarks.Children = Bookmarks.Children?.OrderBy(x => x.Type).ToArray();
+            StateHasChanged();
+        }
+        await _log.LogToConsole(Bookmarks);
+    }
+
+}
