@@ -66,3 +66,10 @@ a, .btn-link {
 .form-control:focus, .btn:focus {
     box-shadow: none;
 }
+
+.bookmark {
+    height: 120px;
+    width: 120px;
+    margin: auto;
+    display: block;
+}

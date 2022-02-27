@@ -1,0 +1,21 @@
+﻿@using NewTab.Web.Models
+
+
+@if (Bookmark.Type == "folder") {
+    <div class="bookmark bg-dark text-white" @onclick="() => ShowFolder(Bookmark)">
+        @Bookmark.Name
+    </div>
+} else {
+    <a class="bookmark bg-success text-white" href="@(Bookmark.Url ?? "#")" target="_blank">
+        @Bookmark.Name
+    </a>
+}
+
+
+@code {
+
+    [Parameter]
+    public Bookmark? Bookmark { get; set; }
+
+
+}

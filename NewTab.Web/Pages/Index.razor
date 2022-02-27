@@ -13,39 +13,30 @@
             <Search />
         </button>
     </div>
-    
+
 
     @if (Bookmarks?.Children != null) {
         const int itemsInRow = 9;
         var rows = (int)Math.Ceiling((double)Bookmarks.Children.Count / itemsInRow);
         var counter = 0;
+
         for (var row = 0; row < rows; row++) {
             var tempItemsInRow = itemsInRow;
             <div class="row text-center">
                 @for (var column = 0; column < tempItemsInRow; column++) {
 
                     if (BookmarkStack.Count > 1 && row == 0 && column == 0) {
-                        rows = (int) Math.Ceiling(((double) Bookmarks.Children.Count + 1) / itemsInRow);
+                        rows = (int)Math.Ceiling(((double)Bookmarks.Children.Count + 1) / itemsInRow);
                         tempItemsInRow--;
                         <div class="col"><div class="bg-primary py-5 text-white" @onclick="() => ShowFolder(null)">Folder Up</div></div>
                     }
 
-                    if (counter >= Bookmarks.Children.Count) {
-                        <div class="col"><div class="bg-danger py-5 text-white">&nbsp;</div></div>
-                    } else {
-                        var bookmark = Bookmarks.Children[counter];
-                        <div class="col">
-                            @if (bookmark.Type == "folder") {
-                                <div class="bg-dark py-5 text-white" @onclick="() => ShowFolder(bookmark)">
-                                    @bookmark.Name
-                                </div>
-                            } else {
-                                <a class="bg-success py-5 text-white d-block" href="@(bookmark.Url ?? "#")" target="_blank">
-                                    @bookmark.Name
-                                </a>
-                            }
-                        </div>
-                    }
+                    <div class="col">
+                        @if (counter < Bookmarks.Children.Count) {
+                            <BookmarkItem Bookmark="Bookmarks.Children[counter]" />
+                        }
+                    </div>
+
                     counter++;
                 }
             </div>
@@ -90,6 +81,5 @@
             Bookmarks.Children = Bookmarks.Children?.OrderBy(x => x.Type).ToList();
             StateHasChanged();
         }
-
     }
 }
