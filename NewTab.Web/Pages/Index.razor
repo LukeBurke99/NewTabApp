@@ -1,14 +1,14 @@
-﻿@using NewTab.Web.Services
-@using NewTab.Web.Models
+﻿@page "/"
 @inject JsConsoleService _log
+@inject ProtectedLocalStorage _browserStorage
 @inject BookmarkService _bookmarkService
-@page "/"
+@inject NavigationManager _navManager
 
 
 <div class="container">
 
     <div class="input-group mb-3">
-        <input type="text" class="form-control border-secondary border-end-0 rounded-0" placeholder="Google search...">
+        <input autofocus type="text" class="form-control border-secondary border-end-0 rounded-0" placeholder="Google search...">
         <button class="btn border border-secondary border-start-0 rounded-0" type="button">
             <Search />
         </button>
@@ -28,12 +28,14 @@
                     if (BookmarkStack.Count > 1 && row == 0 && column == 0) {
                         rows = (int)Math.Ceiling(((double)Bookmarks.Children.Count + 1) / itemsInRow);
                         tempItemsInRow--;
-                        <div class="col"><div class="bg-primary py-5 text-white" @onclick="() => ShowFolder(null)">Folder Up</div></div>
+                        <div class="col">
+                            <BookmarkItem UpdateBookmarksEvent="ShowFolder" FolderUp="true" />
+                        </div>
                     }
 
                     <div class="col">
                         @if (counter < Bookmarks.Children.Count) {
-                            <BookmarkItem Bookmark="Bookmarks.Children[counter]" />
+                            <BookmarkItem Bookmark="Bookmarks.Children[counter]" UpdateBookmarksEvent="ShowFolder" />
                         }
                     </div>
 
@@ -50,17 +52,24 @@
 @code {
 
     private Bookmark? Bookmarks { get; set; }
-    private Stack<Bookmark> BookmarkStack { get; set; } = new();
+    private Stack<Bookmark> BookmarkStack { get; } = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await GetBookmarksAsync();
+        {
+            var bookmarksFile = await _browserStorage.GetAsync<string>("BookmarkPath");
+            if (string.IsNullOrEmpty(bookmarksFile.Value))
+                _navManager.NavigateTo(@Routes.Settings);
+            else 
+                await GetBookmarksAsync(bookmarksFile.Value);
+        }
     }
 
-    private async Task GetBookmarksAsync()
+
+    private async Task GetBookmarksAsync(string bookmarkFileLocation)
     {
-        Bookmarks = await _bookmarkService.GetBookmarksAsync();
+        Bookmarks = await _bookmarkService.GetBookmarksAsync(bookmarkFileLocation);
         if (Bookmarks != null) {
             ShowFolder(Bookmarks);
         }
@@ -68,18 +77,17 @@
     }
 
 
-    private void ShowFolder(Bookmark? folder, bool addToHistory = true)
+    private void ShowFolder(Bookmark? folder)
     {
         if (folder == null) {
             BookmarkStack.Pop();
-            ShowFolder(BookmarkStack.Peek(), false);
+            folder = BookmarkStack.Peek();
         } else {
-            if (addToHistory)
-                BookmarkStack.Push(folder);
-
-            Bookmarks = folder;
-            Bookmarks.Children = Bookmarks.Children?.OrderBy(x => x.Type).ToList();
-            StateHasChanged();
+            BookmarkStack.Push(folder);
         }
+
+        Bookmarks = folder;
+        Bookmarks.Children = Bookmarks.Children?.OrderBy(x => x.Type).ToList();
+        StateHasChanged();
     }
 }

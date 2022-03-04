@@ -72,4 +72,18 @@ a, .btn-link {
     width: 120px;
     margin: auto;
     display: block;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.bookmark > img {
+    display: block;
+    width: 100%;
+    height: 100px;
+    padding: 0 10px;
+}
+
+.bookmark p {
+    margin: 0;
+    font-size: 80%
 }

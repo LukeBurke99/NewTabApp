@@ -1,15 +1,29 @@
 ﻿@using NewTab.Web.Models
 
-
-@if (Bookmark.Type == "folder") {
-    <div class="bookmark bg-dark text-white" @onclick="() => ShowFolder(Bookmark)">
-        @Bookmark.Name
+@if (FolderUp) {
+    <div title="Folder Up" class="bookmark" @onclick="() => UpdateBookmark(null)">
+        <img src="img/folder-up.png" alt="Folder Up" />
+        <p>Folder Up</p>
     </div>
 } else {
-    <a class="bookmark bg-success text-white" href="@(Bookmark.Url ?? "#")" target="_blank">
-        @Bookmark.Name
-    </a>
+    @if (Bookmark != null) {
+
+        @if (Bookmark.Type == "folder") {
+            <div title="@Bookmark.Name" class="bookmark" @onclick="() => UpdateBookmark(Bookmark)">
+                <img src="img/folder.png" alt="@Bookmark.Name" />
+                <p>@Bookmark.Name</p>
+            </div>
+        } else {
+            <a title="@Bookmark.Name" class="bookmark bg-success text-white" href="@(Bookmark.Url ?? "#")" target="_blank">
+                <img src="" alt="@Bookmark.Name" />
+                <p>@Bookmark.Name</p>
+            </a>
+        }
+
+    }
 }
+
+
 
 
 @code {
@@ -17,5 +31,16 @@
     [Parameter]
     public Bookmark? Bookmark { get; set; }
 
+    [Parameter]
+    public bool FolderUp { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<Bookmark> UpdateBookmarksEvent { get; set; }
+
+
+    public async void UpdateBookmark(Bookmark? bookmark)
+    {
+        await UpdateBookmarksEvent.InvokeAsync(bookmark);
+    }
 
 }

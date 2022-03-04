@@ -1,0 +1,42 @@
+﻿@page "/Settings"
+@inject ProtectedLocalStorage _browserStorage
+
+<PageTitle>Settings</PageTitle>
+
+
+<h1>Settings</h1>
+
+<p>Enter the location of your bookmark file</p>
+
+<EditForm Model="@_path" OnSubmit="@Submit">
+    
+    <div class="input-group">
+        <InputText class="form-control" @bind-Value="@_path.Value" />
+        <button class="btn btn-success px-5" type="submit">Save</button>
+    </div>
+
+</EditForm>
+
+
+@code {
+
+    private readonly StringInput _path = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) {
+            var result = await _browserStorage.GetAsync<string>("BookmarkPath");
+            if (result.Success) {
+                _path.Value = result.Value;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task Submit(EditContext obj)
+    {
+        if (_path.Value != null)
+            await _browserStorage.SetAsync("BookmarkPath", _path.Value);
+    }
+
+}

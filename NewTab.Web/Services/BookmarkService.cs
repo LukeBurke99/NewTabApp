@@ -5,14 +5,12 @@ namespace NewTab.Web.Services;
 
 public class BookmarkService
 {
-	public async Task<Bookmark?> GetBookmarksAsync()
+	public async Task<Bookmark?> GetBookmarksAsync(string bookmarkFileLocation)
 	{
-		const string path = @"C:\Users\lukej\AppData\Local\Google\Chrome\User Data\Default\Bookmarks";
-
-		if (!File.Exists(path))
+		if (!File.Exists(bookmarkFileLocation))
 			throw new FileNotFoundException("The Bookmarks file does not exist at that location.");
 
-		var json = await File.ReadAllTextAsync(path);
+		var json = await File.ReadAllTextAsync(bookmarkFileLocation);
 		if (string.IsNullOrEmpty(json))
 			return null;
 
